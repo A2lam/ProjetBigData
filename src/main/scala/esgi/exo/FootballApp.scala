@@ -41,6 +41,9 @@ object FootballApp {
       spark.stop()
     }
 
+    /**
+     * Part 1 : Cleaning data
+     */
     // Reading the the csv input file into dataFrame
     val dfMatches = spark
       .read
@@ -80,6 +83,13 @@ object FootballApp {
     // Keeping only matches above 1980
     val dfMatchesFranceAfter1980 = dfMatchesFrance.filter(colDate >= "1980-03-01")
 
+    // Printing result df schema and some rows
+    dfMatchesFranceAfter1980.printSchema()
+    dfMatchesFranceAfter1980.show(10)
+
+    /**
+     * Part 2 : Statistics
+     */
     // Declaring check home - away UDF
     val homeAwayCheck = udf(this.homeAwayChecking _)
 
@@ -90,10 +100,6 @@ object FootballApp {
     // Adding home - away checking column
     val dfMatchesFranceHA = dfMatchesFranceAfter1980.withColumn("match_a_domicile", homeAwayCheck(colMatch))
 
-    // Printing result df schema and some rows
-    dfMatchesFranceHA.printSchema()
-    dfMatchesFranceHA.show(10)
-
     // Calculating stats
     val dfStats = dfMatchesFranceHA
       .groupBy(colAdversaire)
@@ -103,9 +109,23 @@ object FootballApp {
         avg(colScoreAdversaire).alias("points_moyen_adversaire"),
       )
 
-    // Printing some rows of result df
+    // Printing df schema and some rows of result and writing into parquet file
+    dfStats.printSchema()
     dfStats.show(10)
-    dfStats.write.mode("overwrite").parquet("data/stats.parquets")
+    dfStats.write.mode("overwrite").parquet("data/stats.parquet")
+
+    /**
+     * Part 3 : Joining
+     */
+    // Reading the parquet file
+    val dfStatsWritten = spark.read.parquet("data/stats.parquet")
+    // Joining with the firs df
+    val dfJoined = dfMatchesFranceAfter1980.join(dfStatsWritten, "adversaire")
+
+    // Printing df schema and some rows of result and writing into parquet file
+    dfJoined.printSchema()
+    dfJoined.show(10)
+    dfJoined.write.mode("overwrite").parquet("data/result.parquet")
 
     // Stopping the spark session
     spark.stop()
