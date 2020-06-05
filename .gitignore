@@ -111,5 +111,6 @@ buildNumber.properties
 
 # End of https://www.toptal.com/developers/gitignore/api/maven,intellij,linux
 
+data/df_matches.csv
 data/stats.parquet
 data/result.parquet
