@@ -1,14 +1,7 @@
 package esgi.exo
 
-import org.apache.spark.sql.SparkSession
-import org.apache.spark.sql.functions.col
-import org.apache.spark.sql.functions.to_date
-import org.apache.spark.sql.functions.udf
-import org.apache.spark.sql.functions.count
-import org.apache.spark.sql.functions.lit
-import org.apache.spark.sql.functions.avg
-import org.apache.spark.sql.functions.sum
-import org.apache.spark.sql.functions.max
+import org.apache.spark.sql.{SparkSession, SaveMode}
+import org.apache.spark.sql.functions.{col, to_date, udf, count, lit, avg, sum, max, year, month}
 import org.apache.spark.sql.types.IntegerType
 
 object FootballApp {
@@ -119,7 +112,7 @@ object FootballApp {
     // Printing df schema and some rows of result and writing into parquet file
     dfStats.printSchema()
     dfStats.show(100)
-    dfStats.write.mode("overwrite").parquet("data/stats.parquet")
+    dfStats.write.mode(SaveMode.Overwrite).parquet("data/stats.parquet")
 
     /**
      * Part 3 : Joining
@@ -132,7 +125,10 @@ object FootballApp {
     // Printing df schema and some rows of result and writing into parquet file
     dfJoined.printSchema()
     dfJoined.show(100)
-    dfJoined.write.mode("overwrite").parquet("data/result.parquet")
+    dfJoined
+      .withColumn("year", year(colDate))
+      .withColumn("month", month(colDate))
+      .write.partitionBy("year", "month").mode(SaveMode.Overwrite).parquet("data/result.parquet")
 
     // Stopping the spark session
     spark.stop()
