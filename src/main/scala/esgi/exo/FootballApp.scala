@@ -24,7 +24,7 @@ object FootballApp {
     // Creating spark session
     val spark = SparkSession
       .builder
-      .appName("Program")
+      .appName("FootballApp")
       .config("spark.master", "local")
       .getOrCreate()
 
