@@ -30,5 +30,27 @@
             <version>2.4.5</version>
             <scope>provided</scope>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/io.univalence/spark-test -->
+        <dependency>
+            <groupId>io.univalence</groupId>
+            <artifactId>spark-test_2.12</artifactId>
+            <version>0.3</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
+
+    <repositories>
+        <repository>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <id>spark-test</id>
+            <name>all-mvn-local</name>
+            <url>http://dl.bintray.com/univalence/univalence-jvm</url>
+        </repository>
+    </repositories>
 </project>
