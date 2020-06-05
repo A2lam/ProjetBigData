@@ -104,7 +104,7 @@ object FootballApp {
         avg(colScoreFrance).alias("points_moyen_france"),
         avg(colScoreAdversaire).alias("points_moyen_adversaire"),
         (sum(colHomeMatch.cast(IntegerType)) * 100 / count(colHomeMatch)).alias("%_match_domicile"),
-        sum(colCompetition.contains("Coupe du monde").cast(IntegerType)).alias("nb_match_CDM"),
+        sum(colCompetition.startsWith("Coupe du monde").cast(IntegerType)).alias("nb_match_CDM"),
         max(colPenaltyAdversaire).alias("plus_grand_nb_penalites_adversaire"),
         (sum(colPenaltyAdversaire) - sum(colPenaltyFrance)).alias("rapport_penalites_adversaire_france")
       )
