@@ -5,9 +5,11 @@ import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.functions.to_date
 import org.apache.spark.sql.functions.udf
 import org.apache.spark.sql.functions.count
-import org.apache.spark.sql.functions.countDistinct
 import org.apache.spark.sql.functions.lit
 import org.apache.spark.sql.functions.avg
+import org.apache.spark.sql.functions.sum
+import org.apache.spark.sql.functions.max
+import org.apache.spark.sql.types.IntegerType
 
 object FootballApp {
   // Function that holds int casting
@@ -85,7 +87,7 @@ object FootballApp {
 
     // Printing result df schema and some rows
     dfMatchesFranceAfter1980.printSchema()
-    dfMatchesFranceAfter1980.show(10)
+    dfMatchesFranceAfter1980.show(100)
 
     /**
      * Part 2 : Statistics
@@ -96,6 +98,7 @@ object FootballApp {
     val colMatch = col("match")
     val colAdversaire = col("adversaire")
     val colHomeMatch = col("match_a_domicile")
+    val colCompetition = col("competition")
 
     // Adding home - away checking column
     val dfMatchesFranceHA = dfMatchesFranceAfter1980.withColumn("match_a_domicile", homeAwayCheck(colMatch))
@@ -107,11 +110,15 @@ object FootballApp {
         count(lit(1)).alias("total_match"),
         avg(colScoreFrance).alias("points_moyen_france"),
         avg(colScoreAdversaire).alias("points_moyen_adversaire"),
+        (sum(colHomeMatch.cast(IntegerType)) * 100 / count(colHomeMatch)).alias("%_match_domicile"),
+        sum(colCompetition.contains("Coupe du monde").cast(IntegerType)).alias("nb_match_CDM"),
+        max(colPenaltyAdversaire).alias("plus_grand_nb_penalites_adversaire"),
+        (sum(colPenaltyAdversaire) - sum(colPenaltyFrance)).alias("rapport_penalites_adversaire_france")
       )
 
     // Printing df schema and some rows of result and writing into parquet file
     dfStats.printSchema()
-    dfStats.show(10)
+    dfStats.show(100)
     dfStats.write.mode("overwrite").parquet("data/stats.parquet")
 
     /**
@@ -124,7 +131,7 @@ object FootballApp {
 
     // Printing df schema and some rows of result and writing into parquet file
     dfJoined.printSchema()
-    dfJoined.show(10)
+    dfJoined.show(100)
     dfJoined.write.mode("overwrite").parquet("data/result.parquet")
 
     // Stopping the spark session
